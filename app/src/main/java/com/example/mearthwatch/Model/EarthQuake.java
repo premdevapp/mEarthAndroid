@@ -1,6 +1,6 @@
 package com.example.mearthwatch.Model;
 
-public class EartQuake {
+public class EarthQuake {
     private String place;
     private String detailLink;
     private String type;
@@ -9,9 +9,9 @@ public class EartQuake {
     private double longitude;
     private long time;
 
-    public EartQuake(){}
+    public EarthQuake(){}
 
-    public EartQuake(String place, String detailLink, String type, double magnitude, double latitude, double longitude, long time) {
+    public EarthQuake(String place, String detailLink, String type, double magnitude, double latitude, double longitude, long time) {
         this.place = place;
         this.detailLink = detailLink;
         this.type = type;
