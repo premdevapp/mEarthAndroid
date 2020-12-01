@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -22,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.mearthwatch.Model.EartQuake;
 import com.example.mearthwatch.Util.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -31,9 +33,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -61,10 +70,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getEarthQuakes() {
+
+        EartQuake eartQuake = new EartQuake();
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.URL, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                try {
+                    JSONArray features = response.getJSONArray("features");
+                    for (int i = 0; i < Constants.LIMIT; i++) {
+                        JSONObject properties = features.getJSONObject(i).getJSONObject("properties");
+                        JSONObject geometry = features.getJSONObject(i).getJSONObject("geometry");
+                        JSONArray coordinates = geometry.getJSONArray("coordinates");
 
+                        double longCoor = coordinates.getDouble(0);
+                        double latCoor = coordinates.getDouble(1);
+
+                        eartQuake.setPlace(properties.getString("place"));
+                        eartQuake.setType(properties.getString("type"));
+                        eartQuake.setTime(properties.getLong("time"));
+                        eartQuake.setMagnitude(properties.getDouble("mag"));
+                        eartQuake.setDetailLink(properties.getString("detail"));
+
+                        DateFormat dateFormat = DateFormat.getInstance();
+                        String formattedDate = dateFormat.format(new Date(properties.getLong("time")).getTime());
+
+                        eartQuake.setLongitude(longCoor);
+                        eartQuake.setLatitude(latCoor);
+
+
+                        MarkerOptions markerOptions = new MarkerOptions();
+                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        markerOptions.title(eartQuake.getPlace());
+                        markerOptions.snippet(MessageFormat.format("Magnitude : {0} \n Date : {1}",eartQuake.getMagnitude(), formattedDate));
+
+                        LatLng latLng = new LatLng(eartQuake.getLatitude(), eartQuake.getLongitude());
+
+                        markerOptions.position(latLng);
+
+                        Marker marker = mMap.addMarker(markerOptions);
+                        marker.setTag(eartQuake.getDetailLink());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+
+                        // Log.d("properties", "onResponse: "+ properties.getString("place"));
+                        //Log.d("coordinates", "longitude: "+ longCoor + " latitude:  " + latCoor);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -164,8 +217,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            if(ContextCompat.checkSelfPermission(this,
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
