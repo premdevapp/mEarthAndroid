@@ -24,6 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mearthwatch.Model.EartQuake;
+import com.example.mearthwatch.UI.CustomInfoWindow;
 import com.example.mearthwatch.Util.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -44,7 +45,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -156,6 +157,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        //custom view
+        mMap.setInfoWindowAdapter(new CustomInfoWindow(getApplicationContext()));
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(this);
+
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
@@ -224,5 +231,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        getQuakeDetails(marker.getTag().toString());
+        //Toast.makeText(getApplicationContext(), marker.getTag().toString(), Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void getQuakeDetails(String url) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                String detailsURL = "";
+                try {
+                    JSONObject properties = response.getJSONObject("properties");
+                    JSONObject products = properties.getJSONObject("products");
+                    JSONArray geoserve = products.getJSONArray("geoserve");
+
+                    for (int i = 0; i < geoserve.length(); i++){
+                        JSONObject geoServeObj = geoserve.getJSONObject(i);
+                        JSONObject contentObj = geoServeObj.getJSONObject("contents");
+                        JSONObject geoJsonObj = contentObj.getJSONObject("geoserve.json");
+
+                         detailsURL = geoJsonObj.getString("url");
+                    }
+                    Log.d("url", "onResponse: "+ detailsURL);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(jsonObjectRequest);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
     }
 }
