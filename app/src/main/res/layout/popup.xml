@@ -10,7 +10,7 @@
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <RelativeLayout
                 android:padding="25sp"
@@ -22,7 +22,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:text="More Information"
+                    android:text="@string/more_information"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/popTitle"
                     android:padding="8dp"
-                    android:text="Surrounding Cities"
+                    android:text="@string/surrounding_cities"
                     android:textSize="17sp" />
 
                 <Button
@@ -40,7 +40,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_alignBottom="@+id/popListTitle"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:background="@android:drawable/ic_menu_close_clear_cancel" />
 
                 <TextView
@@ -48,14 +48,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/popListTitle"
-                    android:text="Hello"
+                    android:text="@string/hello"
                     android:textSize="15sp" />
 
                 <WebView
                     android:id="@+id/htmlWebview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/popList"></WebView>
+                    android:layout_below="@id/popList" />
 
                 <Button
                     android:id="@+id/dismissPop"
@@ -64,7 +64,7 @@
                     android:layout_below="@id/htmlWebview"
                     android:layout_centerHorizontal="true"
                     android:background="@color/cardview_light_background"
-                    android:text="Close"
+                    android:text="@string/close"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
 

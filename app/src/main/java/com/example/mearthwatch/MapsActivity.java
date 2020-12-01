@@ -28,6 +28,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mearthwatch.Model.EarthQuake;
 import com.example.mearthwatch.UI.CustomInfoWindow;
@@ -222,7 +223,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 double lat = coordinates.getDouble(1);
 
 
-
                                 //Log.d("Quake: ", lon + ", " + lat);
                                 earthQuake.setPlace(properties.getString("place"));
                                 earthQuake.setType(properties.getString("type"));
@@ -233,7 +233,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 earthQuake.setDetailLink(properties.getString("detail"));
 
                                 java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
-                                String formattedDate =  dateFormat.format(new Date(Long.valueOf(properties.getLong("time")))
+                                String formattedDate = dateFormat.format(new Date(Long.valueOf(properties.getLong("time")))
                                         .getTime());
 
                                 MarkerOptions markerOptions = new MarkerOptions();
@@ -247,7 +247,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                                 //Add circle to markers that have mag > x
-                                if (earthQuake.getMagnitude() >= 2.0 ) {
+                                if (earthQuake.getMagnitude() >= 2.0) {
                                     CircleOptions circleOptions = new CircleOptions();
                                     circleOptions.center(new LatLng(earthQuake.getLatitude(),
                                             earthQuake.getLongitude()));
@@ -307,19 +307,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     JSONObject properties = response.getJSONObject("properties");
                     JSONObject products = properties.getJSONObject("products");
-                    JSONArray geoserve = products.getJSONArray("origin");
+                    JSONArray nearbyCities = products.getJSONArray("nearby-cities");
 
-                    for (int i = 0; i < geoserve.length(); i++) {
-                        JSONObject geoserveObj = geoserve.getJSONObject(i);
+                    for (int i = 0; i < nearbyCities.length(); i++) {
+                        JSONObject geoserveObj = nearbyCities.getJSONObject(i);
+                        JSONObject contents = geoserveObj.getJSONObject("contents");
+                        JSONObject contentObj = contents.getJSONObject("nearby-cities.json");
 
-                        JSONObject contentObj = geoserveObj.getJSONObject("contents");
-                        JSONObject geoXmlObj = contentObj.getJSONObject("quakeml.xml");
 
-                        detailsUrl = geoXmlObj.getString("url");
+                        detailsUrl = contentObj.getString("url");
 
 
                     }
-                    Log.d("URL: ", detailsUrl);
+                    Log.d("urll", "onResponse: " + detailsUrl);
+
 
                     getMoreDetails(detailsUrl);
 
@@ -343,12 +344,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void getMoreDetails(String url) {
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
-                url, new Response.Listener<JSONObject>() {
+        StringRequest jsonObjectRequest = new StringRequest (Request.Method.GET,
+                url, new Response.Listener<String>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(String response) {
 
-                dialogBuilder = new AlertDialog.Builder(MapsActivity.this);
+
+/*
+
+               dialogBuilder = new AlertDialog.Builder(MapsActivity.this);
                 View view = getLayoutInflater().inflate(R.layout.popup, null);
 
                 Button dismissButton = (Button) view.findViewById(R.id.dismissPop);
@@ -356,6 +360,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 TextView popList = (TextView) view.findViewById(R.id.popList);
                 WebView htmlPop = (WebView) view.findViewById(R.id.htmlWebview);
 
+                StringBuilder stringBuilder = new StringBuilder();
+*/
+
+                        Log.d("disss", "dist: "+ response);
+
+
+
+                /* try {
+                    *//*for(int i =0; i < main.length(); i++){
+                     JSONObject dataObj = main.getJSONObject(i);
+                     String dataloc = dataObj.getString("distance");
+                        Log.d("data", "onResponse: "+ dataloc);
+                    }*//*
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }*/
+
+
+
+                /*
                 StringBuilder stringBuilder = new StringBuilder();
 
 
@@ -414,11 +438,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-
                 } catch (JSONException e) {
                     e.printStackTrace();
-                }
-
+                }*/
 
             }
         }, new Response.ErrorListener() {
