@@ -18,8 +18,7 @@
                 android:id="@+id/iconInfo"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@android:drawable/ic_dialog_alert"
-                android:backgroundTint="@color/design_default_color_error"
+                android:src="@android:drawable/ic_input_get"
                 android:contentDescription="@string/todo" />
 
             <TextView
